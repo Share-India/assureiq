@@ -1,0 +1,42 @@
+﻿version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Root@123
+      MYSQL_DATABASE: assureiq_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Root@123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=Root@123
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=assureiq_db
+      - SECRET_KEY=7ef0a498b8c54c30b201a4db95c1c8f1
+      - GEMINI_API_KEY=$${GEMINI_API_KEY}
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

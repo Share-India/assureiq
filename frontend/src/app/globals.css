@@ -1,0 +1,106 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary-container: #2563eb;
+  --color-on-surface: #0b1c30;
+  --color-on-error-container: #93000a;
+  --color-inverse-surface: #213145;
+  --color-on-secondary: #ffffff;
+  --color-background: #f8f9ff;
+  --color-error: #ba1a1a;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-background: #0b1c30;
+  --color-on-primary-container: #eeefff;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-inverse-primary: #b4c5ff;
+  --color-tertiary-fixed-dim: #6bd8cb;
+  --color-on-error: #ffffff;
+  --color-surface-container: #e5eeff;
+  --color-on-secondary-fixed: #341100;
+  --color-on-primary: #ffffff;
+  --color-primary-fixed: #dbe1ff;
+  --color-on-secondary-fixed-variant: #783200;
+  --color-error-container: #ffdad6;
+  --color-tertiary-container: #007b71;
+  --color-on-tertiary-fixed-variant: #005049;
+  --color-on-tertiary: #ffffff;
+  --color-on-secondary-container: #5c2400;
+  --color-secondary-fixed: #ffdbca;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-surface-variant: #d3e4fe;
+  --color-surface-container-low: #eff4ff;
+  --color-primary: #004ac6;
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #cbdbf5;
+  --color-on-tertiary-fixed: #00201d;
+  --color-on-surface-variant: #434655;
+  --color-tertiary-fixed: #89f5e7;
+  --color-secondary: #9d4300;
+  --color-secondary-fixed-dim: #ffb690;
+  --color-on-primary-fixed: #00174b;
+  --color-surface-tint: #0053db;
+  --color-tertiary: #006058;
+  --color-on-tertiary-container: #b3fff3;
+  --color-outline-variant: #c3c6d7;
+  --color-outline: #737686;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-bright: #f8f9ff;
+  --color-secondary-container: #fd761a;
+  --color-surface-container-high: #dce9ff;
+
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  --spacing-stack-lg: 2rem;
+  --spacing-container-padding: 2rem;
+  --spacing-stack-sm: 0.5rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-stack-md: 1rem;
+  --spacing-unit: 4px;
+
+  --font-headline-lg: Manrope, sans-serif;
+  --font-body-lg: Manrope, sans-serif;
+  --font-label-sm: Manrope, sans-serif;
+  --font-display-lg: Manrope, sans-serif;
+  --font-label-md: Manrope, sans-serif;
+  --font-stat-lg: Manrope, sans-serif;
+  --font-headline-md: Manrope, sans-serif;
+  --font-body-md: Manrope, sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .canvas-bg {
+    background: linear-gradient(135deg, #bae6fd 0%, #f0f9ff 50%, #ffffff 100%);
+  }
+  .hero-gradient {
+    background: linear-gradient(135deg, var(--color-on-surface) 0%, var(--color-primary) 100%);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

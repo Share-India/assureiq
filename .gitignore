@@ -1,0 +1,49 @@
+# Virtual environments (Python dependencies)
+backend/.venv/
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+
+# Node.js dependencies
+frontend/node_modules/
+node_modules/
+
+# Next.js build output
+frontend/.next/
+.next/
+out/
+build/
+dist/
+
+# Environment config files (containing API keys and secrets)
+backend/.env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local Database Files
+backend/insurance_app.db
+insurance_app.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded PDFs / Excel source files (large attachments)
+uploads/
+backend/uploads/
+*.pdf
+*.xlsx
+*.xls
+*.csv
+
+# OS & IDE configuration files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
