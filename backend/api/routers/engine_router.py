@@ -2,9 +2,9 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
-from backend.database.db import get_db
+from backend.database.db import get_db, SessionLocal
 from backend.database.models import Company, Document, ExtractedFinancialData, PredictedValue, InsuranceRecommendation, PremiumCalculation, User, AuditLog
 from backend.api.routers.auth import require_sales_or_above, require_manager_or_above, get_current_user
 from backend.ai.gemini_client import extract_financial_data, predict_missing_financials
@@ -23,9 +23,10 @@ def to_decimal(val_str: str) -> Decimal:
     except Exception:
         return Decimal(0)
 
-@router.post("/{company_id}/extract", status_code=status.HTTP_200_OK)
+@router.post("/{company_id}/extract", status_code=status.HTTP_202_ACCEPTED)
 def trigger_extraction(
     company_id: int,
+    background_tasks: BackgroundTasks,
     document_id: int = Query(None, description="Trigger for specific document, otherwise latest is used"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_sales_or_above)
@@ -47,7 +48,17 @@ def trigger_extraction(
     doc.status = "Processing"
     db.commit()
     
+    background_tasks.add_task(run_extraction_pipeline, company_id, doc.id, current_user.id)
+    return {"status": "Processing", "message": "Extraction pipeline triggered in the background."}
+
+def run_extraction_pipeline(company_id: int, document_id: int, user_id: int):
+    db = SessionLocal()
     try:
+        company = db.query(Company).filter(Company.id == company_id).first()
+        doc = db.query(Document).filter(Document.id == document_id).first()
+        if not company or not doc:
+            return
+
         # Run extraction
         raw_result = extract_financial_data(doc.file_path, doc.file_type)
         if not raw_result:
@@ -197,20 +208,20 @@ def trigger_extraction(
         
         # Audit log
         audit = AuditLog(
-            user_id=current_user.id,
+            user_id=user_id,
             action="Trigger Extraction",
             details=f"Processed and extracted financial data from document ID: {doc.id} for company: {company.name}"
         )
         db.add(audit)
         db.commit()
         
-        return {"status": "Success", "message": "Financial data extracted and estimated successfully"}
-        
     except Exception as e:
-        doc.status = "Failed"
-        doc.error_message = str(e)
-        db.commit()
-        raise HTTPException(status_code=500, detail=f"Extraction pipeline failed: {str(e)}")
+        if doc:
+            doc.status = "Failed"
+            doc.error_message = str(e)
+            db.commit()
+    finally:
+        db.close()
 
 @router.post("/{company_id}/calculate", status_code=status.HTTP_200_OK)
 def trigger_calculations(

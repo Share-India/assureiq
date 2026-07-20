@@ -97,10 +97,43 @@ export default function CompanyDetailPage() {
     setErrorMsg('');
     try {
       await api.post(`/companies/${id}/extract`);
-      fetchCompanyDetail();
+      
+      // Start polling for background completion
+      const pollInterval = setInterval(async () => {
+        try {
+          const res = await api.get(`/companies/${id}`);
+          const docs = res.data.documents;
+          if (docs && docs.length > 0) {
+            const latestDoc = docs[0]; // Documents are sorted by uploaded_at desc usually, or we just check processing status
+            // Check if any doc is processing
+            const isProcessing = docs.some((d: any) => d.status === 'Processing');
+            
+            if (!isProcessing) {
+              clearInterval(pollInterval);
+              setCompany(res.data);
+              setExtracting(false);
+              
+              // Check if the latest one failed
+              if (latestDoc.status === 'Failed') {
+                setErrorMsg(latestDoc.error_message || 'Gemini extraction engine failed.');
+              }
+            } else {
+              // Still processing, update the UI with processing status if needed
+              setCompany(res.data);
+            }
+          } else {
+            clearInterval(pollInterval);
+            setExtracting(false);
+          }
+        } catch (e) {
+          clearInterval(pollInterval);
+          setExtracting(false);
+          setErrorMsg('Failed to check extraction status.');
+        }
+      }, 3000); // Poll every 3 seconds
+      
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.detail || 'Gemini extraction engine failed.');
-    } finally {
+      setErrorMsg(err.response?.data?.detail || 'Gemini extraction engine failed to start.');
       setExtracting(false);
     }
   };
