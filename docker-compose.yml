@@ -7,7 +7,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: Root@123
       MYSQL_DATABASE: assureiq_db
-      MYSQL_ROOT_PASSWORD: Root@123
     ports:
       - "3306:3306"
     volumes:
