@@ -19,24 +19,24 @@ def format_currency(val: Any) -> str:
     try:
         dec_val = float(str(val))
         if dec_val == 0:
-            return "₹0"
+            return "INR 0"
         abs_val = abs(dec_val)
         sign = "-" if dec_val < 0 else ""
         
         if abs_val >= 10000000: # 1 Crore = 1,00,00,000
             cr_val = abs_val / 10000000
             if cr_val == int(cr_val):
-                return f"{sign}₹{int(cr_val):,} Cr"
-            return f"{sign}₹{cr_val:,.2f} Cr"
+                return f"{sign}INR {int(cr_val):,} Cr"
+            return f"{sign}INR {cr_val:,.2f} Cr"
         elif abs_val >= 100000: # 1 Lakh = 1,00,000
             lakh_val = abs_val / 100000
             if lakh_val == int(lakh_val):
-                return f"{sign}₹{int(lakh_val):,} Lakh"
-            return f"{sign}₹{lakh_val:,.2f} Lakh"
+                return f"{sign}INR {int(lakh_val):,} Lakh"
+            return f"{sign}INR {lakh_val:,.2f} Lakh"
         else:
             if abs_val == int(abs_val):
-                return f"{sign}₹{int(abs_val):,}"
-            return f"{sign}₹{abs_val:,.2f}"
+                return f"{sign}INR {int(abs_val):,}"
+            return f"{sign}INR {abs_val:,.2f}"
     except Exception:
         return str(val)
 

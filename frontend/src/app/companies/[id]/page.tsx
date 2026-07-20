@@ -133,23 +133,10 @@ export default function CompanyDetailPage() {
   const formatCurrency = (val: any, isCount = false) => {
     if (val === null || val === undefined || isNaN(Number(val))) return '-';
     const num = Number(val);
-    let formatted = "";
     if (isCount) {
-      formatted = new Intl.NumberFormat('en-IN', {
-        maximumFractionDigits: 0
-      }).format(num);
-    } else {
-      formatted = new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(num);
+      return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
     }
-    return (
-      <Tooltip title={formatIndianShort(num) + (isCount ? " Employees" : "")} arrow>
-        <span className="cursor-help border-b border-dashed border-slate-300 dark:border-slate-700">{formatted}</span>
-      </Tooltip>
-    );
+    return formatIndianShort(num);
   };
 
   if (loading && !company) {
