@@ -11,17 +11,21 @@ import { api } from '@/services/api';
 const formatIndianShort = (num: any): string => {
   if (num === null || num === undefined || isNaN(Number(num))) return '-';
   const val = Number(num);
+  if (val === 0) return '₹0';
   const absVal = Math.abs(val);
+  const prefix = val < 0 ? '-₹' : '₹';
+  
   if (absVal >= 10000000) {
-    return `${(val / 10000000).toFixed(2).replace(/\.00$/, '').replace(/(\\.\\d)0$/, '$1')} Cr`;
+    const cr = absVal / 10000000;
+    const formatted = cr >= 1000 ? cr.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : (cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2));
+    return `${prefix}${formatted} Cr`;
   }
   if (absVal >= 100000) {
-    return `${(val / 100000).toFixed(2).replace(/\.00$/, '').replace(/(\\.\\d)0$/, '$1')} L`;
+    const lakh = absVal / 100000;
+    const formatted = lakh % 1 === 0 ? lakh.toFixed(0) : lakh.toFixed(2);
+    return `${prefix}${formatted} Lakh`;
   }
-  if (absVal >= 1000) {
-    return `${(val / 1000).toFixed(2).replace(/\.00$/, '').replace(/(\\.\\d)0$/, '$1')} K`;
-  }
-  return val.toLocaleString('en-IN');
+  return `${prefix}${absVal.toLocaleString('en-IN')}`;
 };
 
 export default function CompanyDetailPage() {

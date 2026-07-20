@@ -14,11 +14,29 @@ from reportlab.lib.units import inch
 from backend.database.models import Company, ExtractedFinancialData, PredictedValue, InsuranceRecommendation, PremiumCalculation
 
 def format_currency(val: Any) -> str:
-    if val is None:
+    if val is None or val == "":
         return "-"
     try:
-        dec_val = Decimal(str(val))
-        return f"{dec_val:,.2f}"
+        dec_val = float(str(val))
+        if dec_val == 0:
+            return "₹0"
+        abs_val = abs(dec_val)
+        sign = "-" if dec_val < 0 else ""
+        
+        if abs_val >= 10000000: # 1 Crore = 1,00,00,000
+            cr_val = abs_val / 10000000
+            if cr_val == int(cr_val):
+                return f"{sign}₹{int(cr_val):,} Cr"
+            return f"{sign}₹{cr_val:,.2f} Cr"
+        elif abs_val >= 100000: # 1 Lakh = 1,00,000
+            lakh_val = abs_val / 100000
+            if lakh_val == int(lakh_val):
+                return f"{sign}₹{int(lakh_val):,} Lakh"
+            return f"{sign}₹{lakh_val:,.2f} Lakh"
+        else:
+            if abs_val == int(abs_val):
+                return f"{sign}₹{int(abs_val):,}"
+            return f"{sign}₹{abs_val:,.2f}"
     except Exception:
         return str(val)
 
@@ -144,7 +162,7 @@ def generate_pdf_report(db: Session, company_id: int) -> BytesIO:
     company_data = [
         [Paragraph("Industry:", table_text_bold), Paragraph(company.industry or "Not Provided", table_text_normal),
          Paragraph("CIN:", table_text_bold), Paragraph(company.cin or "Not Provided", table_text_normal)],
-        [Paragraph("Annual Turnover:", table_text_bold), Paragraph(f"INR {format_currency(company.turnover)}" if company.turnover else "Not Provided", table_text_normal),
+        [Paragraph("Annual Turnover:", table_text_bold), Paragraph(format_currency(company.turnover) if company.turnover else "Not Provided", table_text_normal),
          Paragraph("PAN / GST:", table_text_bold), Paragraph(f"{company.pan or '-'} / {company.gst or '-'}", table_text_normal)],
         [Paragraph("Employees Count:", table_text_bold), Paragraph(str(company.employee_count) if company.employee_count else "Not Provided", table_text_normal),
          Paragraph("Registered Address:", table_text_bold), Paragraph(company.address or "Not Provided", table_text_normal)]
