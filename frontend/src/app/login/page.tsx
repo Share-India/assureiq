@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [regUser, setRegUser] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
+  const [regConfirmPass, setRegConfirmPass] = useState('');
   const [regRole, setRegRole] = useState('Sales Executive');
   
   // General State
@@ -67,8 +68,12 @@ export default function LoginPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regUser || !regEmail || !regPass) {
+    if (!regUser || !regEmail || !regPass || !regConfirmPass) {
       setErrorMsg('Please fill in all fields.');
+      return;
+    }
+    if (regPass !== regConfirmPass) {
+      setErrorMsg('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -303,6 +308,22 @@ export default function LoginPage() {
                     type="password"
                     value={regPass}
                     onChange={(e) => setRegPass(e.target.value)}
+                    sx={{
+                      bgcolor: 'white',
+                      borderRadius: '12px',
+                      '& .MuiInputBase-input': { color: 'black' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#c3c6d7' }
+                    }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 ml-1">Confirm Password</label>
+                  <TextField
+                    variant="outlined"
+                    fullWidth
+                    type="password"
+                    value={regConfirmPass}
+                    onChange={(e) => setRegConfirmPass(e.target.value)}
                     sx={{
                       bgcolor: 'white',
                       borderRadius: '12px',
