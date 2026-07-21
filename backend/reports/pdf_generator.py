@@ -11,7 +11,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-from backend.database.models import Company, ExtractedFinancialData, PredictedValue, InsuranceRecommendation, PremiumCalculation
+from backend.database.models import Company, ExtractedFinancialData, PredictedValue, InsuranceRecommendation, PremiumCalculation, Document
 
 def format_currency(val: Any) -> str:
     if val is None or val == "":
@@ -177,7 +177,12 @@ def generate_pdf_report(db: Session, company_id: int) -> BytesIO:
     story.append(Spacer(1, 20))
     
     # 3. Financial Summary Table
-    story.append(Paragraph("2. Financial Status & Assets", h1_style))
+    latest_doc = db.query(Document).filter(Document.company_id == company_id).order_by(Document.uploaded_at.desc()).first()
+    doc_date_str = ""
+    if latest_doc and latest_doc.uploaded_at:
+        doc_date_str = f" (As on date {latest_doc.uploaded_at.strftime('%d-%b-%Y')})"
+        
+    story.append(Paragraph(f"2. Financial Status & Assets{doc_date_str}", h1_style))
     story.append(Paragraph("The following data has been extracted from verified filings and document reports.", body_style))
     
     # Load extracted financials
