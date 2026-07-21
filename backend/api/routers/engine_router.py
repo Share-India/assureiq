@@ -35,6 +35,9 @@ def trigger_extraction(
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
         
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to extract data for this company")
+        
     # Get document
     if document_id:
         doc = db.query(Document).filter(Document.id == document_id, Document.company_id == company_id).first()
@@ -233,6 +236,9 @@ def trigger_calculations(
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
         
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to run calculations for this company")
+        
     calculate_premiums(db, company_id)
     
     # Audit log
@@ -255,6 +261,9 @@ def get_company_dashboard(
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
+        
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view dashboard for this company")
         
     # Aggregate Dashboard Metrics
     current_assets = get_financial_value(db, company_id, "current_assets")
@@ -369,6 +378,13 @@ def download_company_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_sales_or_above)
 ):
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+        
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to download report for this company")
+        
     try:
         pdf_buffer = generate_pdf_report(db, company_id)
         return StreamingResponse(

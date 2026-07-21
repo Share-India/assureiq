@@ -290,13 +290,13 @@ export default function CompaniesPage() {
                         </IconButton>
                       </Tooltip>
                       
-                      <Tooltip title={isManagerOrAbove ? "Edit Profile" : "Requires Admin role"}>
+                      <Tooltip title={(isAdmin || currentUser?.id === c.created_by) ? "Edit Profile" : "Not authorized"}>
                         <span>
                           <IconButton 
                             onClick={() => handleOpenEdit(c)} 
                             color="secondary" 
                             size="small"
-                            disabled={!isManagerOrAbove}
+                            disabled={!(isAdmin || currentUser?.id === c.created_by)}
                           >
                             <span className="material-symbols-outlined">edit</span>
                           </IconButton>

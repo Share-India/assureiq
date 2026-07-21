@@ -50,6 +50,8 @@ def get_companies(
     current_user: User = Depends(require_sales_or_above)
 ):
     query = db.query(Company)
+    if current_user.role != "Admin":
+        query = query.filter(Company.created_by == current_user.id)
     if name:
         query = query.filter(Company.name.ilike(f"%{name}%"))
     if industry:
@@ -72,6 +74,9 @@ def get_company_detail(
     company = db.query(Company).filter(Company.id == id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
+        
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this company")
         
     # Build response manually or through SQLAlchemy eager loading
     # We will build and format recommendations to include product details
@@ -144,11 +149,14 @@ def update_company(
     id: int, 
     company_in: CompanyCreate, 
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_manager_or_above)
+    current_user: User = Depends(require_sales_or_above)
 ):
     company = db.query(Company).filter(Company.id == id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
+        
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this company")
         
     for k, v in company_in.dict(exclude_unset=True).items():
         setattr(company, k, v)

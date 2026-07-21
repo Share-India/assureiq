@@ -29,6 +29,9 @@ def upload_documents(
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
         
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to upload documents for this company")
+        
     uploaded_docs = []
     for file in files:
         # Validate extension
@@ -102,6 +105,9 @@ def get_company_documents(
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
+        
+    if current_user.role != "Admin" and company.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view documents for this company")
         
     docs = db.query(Document).filter(Document.company_id == company_id).all()
     for d in docs:
