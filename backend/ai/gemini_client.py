@@ -187,7 +187,7 @@ def extract_financial_data(file_path: str, file_type: str) -> Optional[Dict[str,
     except Exception as e:
         print(f"Gemini extraction failed for {file_path}: {str(e)}")
         
-    return generate_mock_extraction_data()
+    return None
 
 def predict_missing_financials(
     company_name: str, 
@@ -236,76 +236,4 @@ def predict_missing_financials(
         print(f"Gemini missing value prediction failed: {str(e)}")
         
     return {"predictions": []}
-
-def generate_mock_extraction_data(file_path: str = "") -> Dict[str, Any]:
-    """
-    Mock fallback data representing standard extraction fields.
-    Used for local testing if API key is not configured or fails.
-    """
-    import hashlib
-    suffix = hashlib.md5(file_path.encode('utf-8')).hexdigest()[:6].upper() if file_path else "123456"
-    mock_name = f"Mock Company {suffix}"
-    mock_pan = f"AACCA{suffix[:4]}F"
-    mock_gst = f"27AACCA{suffix[:4]}F1Z5"
-    mock_cin = f"U72200MH2015PTC{suffix}"
-    
-    return {
-        "company_name": {"value": mock_name, "confidence": 0.95, "source_page": "Page 1"},
-        "industry": {"value": "Information Technology", "confidence": 0.9, "source_page": "Page 1"},
-        "pan": {"value": mock_pan, "confidence": 0.99, "source_page": "Page 1"},
-        "gst": {"value": mock_gst, "confidence": 0.99, "source_page": "Page 1"},
-        "cin": {"value": mock_cin, "confidence": 0.99, "source_page": "Page 1"},
-        "address": {"value": "101, Tech Park, Bandra Kurla Complex, Mumbai, MH - 400051", "confidence": 0.95, "source_page": "Page 1"},
-        "current_assets": {"value": "45000000.00", "confidence": 0.85, "source_page": "Page 3"},
-        "fixed_assets": {"value": "12500000.00", "confidence": 0.9, "source_page": "Page 3"},
-        "inventory": {"value": "5000000.00", "confidence": 0.95, "source_page": "Page 3"},
-        "machinery": {"value": "6000000.00", "confidence": 0.9, "source_page": "Page 3"},
-        "cash": {"value": "2500000.00", "confidence": 0.95, "source_page": "Page 4"},
-        "bank_balance": {"value": "7500000.00", "confidence": 0.95, "source_page": "Page 4"},
-        "receivables": {"value": "10000000.00", "confidence": 0.8, "source_page": "Page 3"},
-        "loans": {"value": "4000000.00", "confidence": 0.9, "source_page": "Page 3"},
-        "current_liability": {"value": "12000000.00", "confidence": 0.85, "source_page": "Page 3"},
-        "long_term_liability": {"value": "3500000.00", "confidence": 0.9, "source_page": "Page 3"},
-        "creditors": {"value": "8000000.00", "confidence": 0.85, "source_page": "Page 3"},
-        "employee_count": {"value": "120", "confidence": 0.95, "source_page": "Page 2"},
-        "salary": {"value": "35000000.00", "confidence": 0.9, "source_page": "Page 2"},
-        "pf": {"value": "4200000.00", "confidence": 0.85, "source_page": "Page 2"},
-        "esic": {"value": "1150000.00", "confidence": 0.85, "source_page": "Page 2"},
-        "gratuity": {"value": "1750000.00", "confidence": 0.8, "source_page": "Page 2"},
-        "medical": {"value": "850000.00", "confidence": 0.9, "source_page": "Page 2"},
-        "bonus": {"value": "2500000.00", "confidence": 0.85, "source_page": "Page 2"},
-        "turnover": {"value": "150000000.00", "confidence": 0.95, "source_page": "Page 2"},
-        "revenue": {"value": "150000000.00", "confidence": 0.95, "source_page": "Page 2"},
-        "expenses": {"value": "110000000.00", "confidence": 0.9, "source_page": "Page 2"},
-        "risk_factors": {"value": "High dependence on single client; Exposure to cybersecurity threat due to online databases; Physical warehouse vulnerable to fire hazard.", "confidence": 0.85, "source_page": "Page 5"}
-    }
-
-def generate_mock_predictions(missing_fields: List[str]) -> Dict[str, Any]:
-    """
-    Generates plausible estimates for missing values.
-    """
-    predictions = []
-    defaults = {
-        "turnover": (50000000.00, 75000000.00, 100000000.00, 0.75),
-        "employee_count": (50.0, 75.0, 120.0, 0.8),
-        "fixed_assets": (5000000.00, 8000000.00, 12000000.00, 0.7),
-        "machinery": (2000000.00, 4000000.00, 6000000.00, 0.65),
-        "inventory": (1000000.00, 3000000.00, 5000000.00, 0.6),
-        "salary": (15000000.00, 22000000.00, 30000000.00, 0.75)
-    }
-    for field in missing_fields:
-        field_l = field.lower()
-        if field_l in defaults:
-            min_v, exp_v, max_v, conf = defaults[field_l]
-        else:
-            min_v, exp_v, max_v, conf = (100000.00, 250000.00, 500000.00, 0.5)
-            
-        predictions.append({
-            "field_name": field,
-            "min_value": min_v,
-            "expected_value": exp_v,
-            "max_value": max_v,
-            "confidence": conf
-        })
-    return {"predictions": predictions}
 
