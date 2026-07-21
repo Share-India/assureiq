@@ -18,8 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
-    } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+      localStorage.setItem('theme', 'light');
     }
   }, []);
 
