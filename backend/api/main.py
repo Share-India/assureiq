@@ -13,6 +13,9 @@ from backend.api.routers import auth, company_router, document_router, engine_ro
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(dotenv_path=env_path)
 
+from backend.database.db import engine, Base
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="Corporate Insurance Recommendation & Premium Estimation System API",
     description="Enterprise API for extracting financials and assessing corporate insurance opportunities.",
@@ -22,6 +25,7 @@ app = FastAPI(
 # CORS configurations
 origins = [
     "http://localhost:3000",
+    "http://localhost:3008",
     "http://127.0.0.1:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
