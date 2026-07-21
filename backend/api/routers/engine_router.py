@@ -220,6 +220,7 @@ def run_extraction_pipeline(company_id: int, document_id: int, user_id: int):
         db.commit()
         
     except Exception as e:
+        db.rollback()
         if doc:
             doc.status = "Failed"
             doc.error_message = str(e)
