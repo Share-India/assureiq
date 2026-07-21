@@ -177,10 +177,10 @@ def generate_pdf_report(db: Session, company_id: int) -> BytesIO:
     story.append(Spacer(1, 20))
     
     # 3. Financial Summary Table
-    latest_doc = db.query(Document).filter(Document.company_id == company_id).order_by(Document.uploaded_at.desc()).first()
     doc_date_str = ""
-    if latest_doc and latest_doc.uploaded_at:
-        doc_date_str = f" (As on date {latest_doc.uploaded_at.strftime('%d-%b-%Y')})"
+    doc_date_record = db.query(ExtractedFinancialData).filter(ExtractedFinancialData.company_id == company_id, ExtractedFinancialData.field_name == "document_date").first()
+    if doc_date_record and doc_date_record.extracted_value:
+        doc_date_str = f" (As on date {doc_date_record.extracted_value})"
         
     story.append(Paragraph(f"2. Financial Status & Assets{doc_date_str}", h1_style))
     story.append(Paragraph("The following data has been extracted from verified filings and document reports.", body_style))
@@ -198,7 +198,7 @@ def generate_pdf_report(db: Session, company_id: int) -> BytesIO:
     
     for rec in extracted_records:
         # Avoid cluttering with non-financial details
-        if rec.field_name in ("company_name", "industry", "pan", "gst", "cin", "address", "risk_factors"):
+        if rec.field_name in ("document_date", "company_name", "industry", "pan", "gst", "cin", "address", "risk_factors"):
             continue
         val_display = format_currency(rec.numeric_value) if rec.numeric_value else rec.extracted_value
         financials_data.append([

@@ -19,6 +19,7 @@ class ExtractedField(BaseModel):
     source_page: Optional[str] = Field(None, description="The page number or location identifier.")
 
 class FinancialExtractionSchema(BaseModel):
+    document_date: Optional[ExtractedField] = Field(None, description="The date the document was created or the financial period end date, ideally in DD-MMM-YYYY format (e.g. 31-Mar-2024).")
     company_name: Optional[ExtractedField] = None
     industry: Optional[ExtractedField] = None
     pan: Optional[ExtractedField] = None
@@ -93,7 +94,7 @@ def extract_financial_data(file_path: str, file_type: str) -> Optional[Dict[str,
         
     prompt = """
     You are an expert corporate financial analyst and risk manager.
-    Analyze the uploaded document and extract all available corporate information (including Company Name, Industry, PAN, GST, CIN, Address, and Credit Rating if available), asset metrics, liability details, employee benefits, and business indicators.
+    Analyze the uploaded document and extract all available corporate information (including Company Name, Industry, PAN, GST, CIN, Address, Credit Rating, and document_date/financial year end date), asset metrics, liability details, employee benefits, and business indicators.
     Ensure that:
     1. Numeric values contain digits only where applicable (decimals allowed). E.g. '12000000.00' instead of '' or 'Rs 1.2 Crore'.
     2. CRITICAL SCALING RULE: Financial tables in Indian filings often express values in Lakhs (1 Lakh = 100,000 INR) or Crores (1 Crore = 10,000,000 INR) or Thousands (1 Thousand = 1,000 INR).

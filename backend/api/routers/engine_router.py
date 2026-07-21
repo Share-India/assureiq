@@ -73,6 +73,7 @@ def run_extraction_pipeline(company_id: int, document_id: int, user_id: int):
         
         # Categorized fields mapping
         category_map = {
+            "document_date": ("Business Info", "document_date"),
             "company_name": ("Business Info", "name"),
             "industry": ("Business Info", "industry"),
             "pan": ("Business Info", "pan"),
@@ -121,7 +122,7 @@ def run_extraction_pipeline(company_id: int, document_id: int, user_id: int):
                 if val_str:
                     num_val = None
                     # Try converting to decimal for numerical fields
-                    if field_name not in ("company_name", "industry", "pan", "gst", "cin", "address", "credit_rating", "risk_factors"):
+                    if field_name not in ("document_date", "company_name", "industry", "pan", "gst", "cin", "address", "credit_rating", "risk_factors"):
                         num_val = to_decimal(val_str)
                         
                     # Save to db
