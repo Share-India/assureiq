@@ -24,6 +24,8 @@ app = FastAPI(
 
 # CORS configurations
 origins = [
+    "https://assureiq.shareindiainsurance.com",
+    "http://assureiq.shareindiainsurance.com",
     "http://localhost:3001",
     "http://192.168.0.62:3001",
     "http://192.168.0.62:3008",
