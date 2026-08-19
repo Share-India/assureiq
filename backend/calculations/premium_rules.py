@@ -4,7 +4,7 @@ import json
 from decimal import Decimal
 import pandas as pd
 from sqlalchemy.orm import Session
-from backend.database.models import Company, ExtractedFinancialData, PredictedValue, InsuranceProduct, InsuranceRecommendation, PremiumCalculation
+from backend.database.models import Company, ExtractedFinancialData, PredictedValue, InsuranceProduct, InsuranceRecommendation, PremiumCalculation, RuleConfig
 
 EXCEL_PATH = os.path.join(os.path.dirname(__file__), "Products_Industry_Wise.xlsx")
 _df_cache = None
@@ -156,6 +156,16 @@ def get_financial_value(db: Session, company_id: int, field_name: str) -> Decima
         
     return Decimal(0)
 
+
+def get_rule_value(db: Session, key: str, default_val: Decimal) -> Decimal:
+    rule = db.query(RuleConfig).filter(RuleConfig.key == key).first()
+    if rule and rule.value:
+        try:
+            return Decimal(rule.value)
+        except Exception:
+            return default_val
+    return default_val
+
 def calculate_premiums(db: Session, company_id: int):
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
@@ -177,6 +187,19 @@ def calculate_premiums(db: Session, company_id: int):
     employee_count = get_financial_value(db, company_id, "employee_count")
     inventory = get_financial_value(db, company_id, "inventory")
     salary = get_financial_value(db, company_id, "salary")
+
+    # Fetch dynamic rules
+    fire_default_rate = get_rule_value(db, 'fire_default_rate', Decimal("0.001"))
+    liability_turnover_mult = get_rule_value(db, 'liability_turnover_mult', Decimal("0.2"))
+    liability_default_rate = get_rule_value(db, 'liability_default_rate', Decimal("0.001"))
+    employee_base_coverage = get_rule_value(db, 'employee_base_coverage', Decimal("500000"))
+    employee_default_rate = get_rule_value(db, 'employee_default_rate', Decimal("1000"))
+    marine_turnover_mult = get_rule_value(db, 'marine_turnover_mult', Decimal("0.3"))
+    marine_default_rate = get_rule_value(db, 'marine_default_rate', Decimal("0.0005"))
+    special_asset_mult = get_rule_value(db, 'special_asset_mult', Decimal("0.8"))
+    special_default_rate = get_rule_value(db, 'special_default_rate', Decimal("0.001"))
+    profit_turnover_mult = get_rule_value(db, 'profit_turnover_mult', Decimal("0.5"))
+    profit_default_rate = get_rule_value(db, 'profit_default_rate', Decimal("0.001"))
     
     sub_categories_computed = []
     
@@ -218,22 +241,22 @@ def calculate_premiums(db: Session, company_id: int):
                     premium = coverage * (rate_decimal / Decimal(1000))
                     formula = f"Coverage ({coverage:,.0f}) * Rate ({rate_decimal}) / 1000 (per mille)"
                 else:
-                    premium = coverage * Decimal("0.001")
-                    formula = f"Coverage ({coverage:,.0f}) * Default Rate (0.001)"
+                    premium = coverage * fire_default_rate
+                    formula = f"Coverage ({coverage:,.0f}) * Default Rate ({fire_default_rate})"
                     
             # 2. Liability sub-categories
             elif col_idx in range(16, 24):
-                coverage = turnover * Decimal("0.2")
+                coverage = turnover * liability_turnover_mult
                 if rate_decimal > 0:
                     premium = turnover * rate_decimal
                     formula = f"Turnover ({turnover:,.0f}) * Rate ({rate_decimal})"
                 else:
-                    premium = turnover * Decimal("0.001")
-                    formula = f"Turnover ({turnover:,.0f}) * Default Rate (0.001)"
+                    premium = turnover * liability_default_rate
+                    formula = f"Turnover ({turnover:,.0f}) * Default Rate ({liability_default_rate})"
                     
             # 3. Employee Benefits sub-categories
             elif col_idx in range(24, 30):
-                coverage = employee_count * Decimal("500000")
+                coverage = employee_count * employee_base_coverage
                 if "per Lac per Life" in unit or rate_decimal > 10:
                     premium = employee_count * rate_decimal
                     formula = f"Employees ({employee_count:.0f}) * Rate ({rate_decimal}) per Employee"
@@ -241,38 +264,38 @@ def calculate_premiums(db: Session, company_id: int):
                     premium = coverage * (rate_decimal / Decimal(1000))
                     formula = f"Coverage ({coverage:,.0f}) * Rate ({rate_decimal}) / 1000"
                 else:
-                    premium = employee_count * Decimal("1000")
-                    formula = f"Employees ({employee_count:.0f}) * Default Rate (1000)"
+                    premium = employee_count * employee_default_rate
+                    formula = f"Employees ({employee_count:.0f}) * Default Rate ({employee_default_rate})"
                     
             # 4. Marine sub-categories
             elif col_idx in range(30, 34):
-                coverage = turnover * Decimal("0.3")
+                coverage = turnover * marine_turnover_mult
                 if rate_decimal > 0:
                     premium = coverage * (rate_decimal / Decimal(1000))
                     formula = f"Coverage ({coverage:,.0f}) * Rate ({rate_decimal}) / 1000"
                 else:
-                    premium = coverage * Decimal("0.0005")
-                    formula = f"Coverage ({coverage:,.0f}) * Default Rate (0.0005)"
+                    premium = coverage * marine_default_rate
+                    formula = f"Coverage ({coverage:,.0f}) * Default Rate ({marine_default_rate})"
                     
             # 5. Special sub-categories
             elif col_idx in range(34, 45):
-                coverage = fixed_assets * Decimal("0.8")
+                coverage = fixed_assets * special_asset_mult
                 if rate_decimal > 0:
                     premium = coverage * (rate_decimal / Decimal(1000))
                     formula = f"Coverage ({coverage:,.0f}) * Rate ({rate_decimal}) / 1000"
                 else:
-                    premium = coverage * Decimal("0.001")
-                    formula = f"Coverage ({coverage:,.0f}) * Default Rate (0.001)"
+                    premium = coverage * fire_default_rate
+                    formula = f"Coverage ({coverage:,.0f}) * Default Rate ({fire_default_rate})"
                     
             # 6. Safeguards Profits
             elif col_idx in range(45, 49):
-                coverage = turnover * Decimal("0.5")
+                coverage = turnover * profit_turnover_mult
                 if rate_decimal > 0:
                     premium = coverage * (rate_decimal / Decimal(1000))
                     formula = f"Coverage ({coverage:,.0f}) * Rate ({rate_decimal}) / 1000"
                 else:
-                    premium = coverage * Decimal("0.001")
-                    formula = f"Coverage ({coverage:,.0f}) * Default Rate (0.001)"
+                    premium = coverage * fire_default_rate
+                    formula = f"Coverage ({coverage:,.0f}) * Default Rate ({fire_default_rate})"
                     
             if premium > 0:
                 sub_categories_computed.append({

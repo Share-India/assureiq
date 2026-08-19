@@ -211,3 +211,28 @@ class DashboardMetricsResponse(BaseModel):
     max_premium_opportunity: Decimal
     insurance_penetration: float
     recommendation_count: int
+
+
+class UserWithActivityResponse(UserResponse):
+    documents: List[DocumentResponse] = []
+    
+    class Config:
+        from_attributes = True
+
+# RuleConfig schemas
+class RuleConfigBase(BaseModel):
+    key: str
+    value: str
+    description: Optional[str] = None
+
+class RuleConfigCreate(RuleConfigBase):
+    pass
+
+class RuleConfigResponse(RuleConfigBase):
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RuleConfigUpdateMultiple(BaseModel):
+    rules: List[RuleConfigBase]

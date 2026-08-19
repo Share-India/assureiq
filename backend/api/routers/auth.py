@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from backend.database.db import get_db
 from backend.database.models import User, AuditLog
-from backend.schemas.schemas import UserCreate, UserResponse, Token
+from backend.schemas.schemas import UserCreate, UserResponse, Token, UserWithActivityResponse
 from backend.utils.security import verify_password, hash_password, create_access_token, SECRET_KEY, ALGORITHM
 from typing import List
 
@@ -39,10 +39,10 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
         
     def __call__(self, current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in self.allowed_roles:
+        if str(current_user.role).strip().lower() not in [r.lower() for r in self.allowed_roles]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Operation not permitted for role: {current_user.role}"
+                detail=f"Operation not permitted for user: {current_user.username} with role: {current_user.role}"
             )
         return current_user
 
@@ -106,3 +106,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/users", response_model=List[UserWithActivityResponse])
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    users = db.query(User).all()
+    # Pydantic's from_attributes=True will automatically load user.documents since they are related
+    return users

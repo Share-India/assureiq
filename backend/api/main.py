@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # Ensure backend package is on path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from backend.api.routers import auth, company_router, document_router, engine_router
+from backend.api.routers import auth, company_router, document_router, engine_router, admin_router
 
 # Load dotenv explicitly from backend directory
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -24,6 +24,9 @@ app = FastAPI(
 
 # CORS configurations
 origins = [
+    "http://localhost:3001",
+    "http://192.168.0.62:3001",
+    "http://192.168.0.62:3008",
     "http://localhost:3000",
     "http://localhost:3008",
     "http://127.0.0.1:3000",
@@ -44,6 +47,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(company_router.router, prefix="/api")
 app.include_router(document_router.router, prefix="/api")
 app.include_router(engine_router.router, prefix="/api")
+app.include_router(admin_router.router, prefix="/api")
 
 @app.get("/")
 def get_root():

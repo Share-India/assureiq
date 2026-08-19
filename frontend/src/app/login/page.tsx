@@ -31,8 +31,8 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -53,10 +53,10 @@ export default function LoginPage() {
       });
       
       const { access_token } = res.data;
-      localStorage.setItem('token', access_token);
+      sessionStorage.setItem('token', access_token);
       
       const profileRes = await api.get('/auth/me');
-      localStorage.setItem('user', JSON.stringify(profileRes.data));
+      sessionStorage.setItem('user', JSON.stringify(profileRes.data));
       
       router.push('/companies');
     } catch (err: any) {

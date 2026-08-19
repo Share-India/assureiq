@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       } else {
@@ -53,8 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     setUser(null);
     router.push('/login');
   };
@@ -191,6 +191,52 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <ListItemText primary={<span className="font-bold text-sm">Companies</span>} />
                       </ListItemButton>
                     </ListItem>
+
+                    {user?.role === 'Admin' && (
+                      <ListItem disablePadding>
+                        <ListItemButton 
+                          onClick={() => router.push('/users')}
+                          selected={pathname.startsWith('/users')}
+                          sx={{
+                            borderRadius: '12px',
+                            '&.Mui-selected': { 
+                              bgcolor: 'rgba(37,99,235,0.1)', 
+                              color: '#004ac6',
+                              boxShadow: '0 4px 15px rgba(37,99,235,0.05)'
+                            },
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' }
+                          }}
+                        >
+                          <ListItemIcon sx={{ color: pathname.startsWith('/users') ? '#004ac6' : '#737686' }}>
+                            <span className="material-symbols-outlined">groups</span>
+                          </ListItemIcon>
+                          <ListItemText primary={<span className="font-bold text-sm">Team Activity</span>} />
+                        </ListItemButton>
+                      </ListItem>
+                    )}
+
+                    {user?.role === 'Admin' && (
+                      <ListItem disablePadding>
+                        <ListItemButton 
+                          onClick={() => router.push('/settings')}
+                          selected={pathname.startsWith('/settings')}
+                          sx={{
+                            borderRadius: '12px',
+                            '&.Mui-selected': { 
+                              bgcolor: 'rgba(37,99,235,0.1)', 
+                              color: '#004ac6',
+                              boxShadow: '0 4px 15px rgba(37,99,235,0.05)'
+                            },
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' }
+                          }}
+                        >
+                          <ListItemIcon sx={{ color: pathname.startsWith('/settings') ? '#004ac6' : '#737686' }}>
+                            <span className="material-symbols-outlined">settings_suggest</span>
+                          </ListItemIcon>
+                          <ListItemText primary={<span className="font-bold text-sm">Rules Engine</span>} />
+                        </ListItemButton>
+                      </ListItem>
+                    )}
                   </List>
                   
                   <Box className="p-4 border-t border-slate-200/50 dark:border-slate-800">

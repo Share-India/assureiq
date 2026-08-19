@@ -146,3 +146,11 @@ class AuditLog(Base):
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     
     user = relationship("User", back_populates="audit_logs")
+
+class RuleConfig(Base):
+    __tablename__ = "rule_configs"
+
+    key = Column(String(100), primary_key=True, index=True)
+    value = Column(String(255), nullable=False)
+    description = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
