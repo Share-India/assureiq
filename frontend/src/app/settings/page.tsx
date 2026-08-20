@@ -4,15 +4,8 @@ import {
   Box, Typography, Paper, TextField, Button, Alert, Divider
 } from '@mui/material';
 import { SettingsSuggest as SettingsIcon, Save as SaveIcon } from '@mui/icons-material';
-import axios from 'axios';
+import { api } from '../../services/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const api = axios.create({ baseURL: API_URL });
-api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token');
-  if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 const DEFAULT_RULES = [
   { key: 'fire_default_rate', value: '0.001', label: 'Fire Insurance Default Rate (Multiplier)' },
